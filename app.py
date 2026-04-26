@@ -62,7 +62,7 @@ async def json_to_proto(json_data: str, proto_message: Message) -> bytes:
 def get_account_credentials(region: str) -> str:
     r = region.upper()
     if r == "IND":
-        return "uid=4701946004&password=BEASTS-U55HG56U7-CORE"
+        return "uid=4732484418&password=BP_E7AKQ4YVHCB"
     elif r in {"BR", "US", "SAC", "NA"}:
         return "uid=4737716773&password=xMaSrY_p7p4utfh_hdw"
     elif r == "VN":
@@ -104,7 +104,7 @@ async def create_jwt(region: str):
     proto_bytes = await json_to_proto(body, FreeFire_pb2.LoginReq())
     payload = aes_cbc_encrypt(MAIN_KEY, MAIN_IV, proto_bytes)
 
-    url = "https://loginbp.ggblueshark.com/MajorLogin"
+    url = "https://loginbp.ggpolarbear.com/MajorLogin"
     headers = {'User-Agent': USERAGENT, 'Connection': "Keep-Alive", 'Accept-Encoding': "gzip",
                'Content-Type': "application/octet-stream", 'Expect': "100-continue",
                'X-Unity-Version': "2018.4.11f1", 'X-GA': "v1 1", 'ReleaseVersion': RELEASEVERSION}
