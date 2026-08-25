@@ -1,8 +1,17 @@
-#UNCOMMON CORE ON TOP
+#  UNCOMMON CORE ON TOP BABY !!!
+#  AUTO-REGION FINDER INFO API
+#  CREDIT CHANGER MAA KI CHUT
+#  FULLY FIXED VERSION
+#  IF YOU LEAVE THE CHANNEL AFTER GETTING THIS FILE YOUR MOM IS AN S*X WORKER
+#  JOIN @uncommoncore FOR MORE LEAKS
+
+
 import asyncio
 import time
 import httpx
 import json
+import random
+import threading
 from collections import defaultdict
 from functools import wraps
 from flask import Flask, request, jsonify
@@ -14,34 +23,45 @@ from google.protobuf import json_format, message
 from google.protobuf.message import Message
 from Crypto.Cipher import AES
 import base64
-import random
-import threading
 
+# ---------- Config ----------
 
-# === Settings ===
 MAIN_KEY = base64.b64decode('WWcmdGMlREV1aDYlWmNeOA==')
 MAIN_IV = base64.b64decode('Nm95WkRyMjJFM3ljaGpNJQ==')
 RELEASEVERSION = "OB53"
 USERAGENT = "Dalvik/2.1.0 (Linux; U; Android 13; CPH2095 Build/RKQ1.211119.001)"
-SUPPORTED_REGIONS = {"IND", "BR", "US", "SAC", "NA", "SG", "RU", "ID", "TW", "VN", "TH", "ME", "PK", "CIS", "BD", "EUROPE"}
+SUPPORTED_REGIONS = [
+    "IND", "SG", "ID", "BR", "VN", "US", "SAC", "NA",
+    "RU", "TH", "TW", "BD", "PK", "ME", "CIS", "EUROPE"
+]
 
-# 🔐 API KEY #Do Not Change Or Else (Error)
+# ---------- API KEY SYSTEM ----------
+
 API_KEY = "UCxGAMER"
 
-# === Flask App Setup ===
+# ---------- App Setup ----------
+
 app = Flask(__name__)
 CORS(app)
 cache = TTLCache(maxsize=100, ttl=300)
 cached_tokens = defaultdict(dict)
+uid_region_cache = {}
 
-# === API KEY CHECK ===
-def require_api_key():
-    key = request.args.get("key")
-    if key != API_KEY:
-        return jsonify({"error": "Invalid API Key"}), 403
+# ---------- API KEY DECORATOR ----------
 
+def require_api_key(fn):
+    @wraps(fn)
+    def wrapper(*args, **kwargs):
+        key = request.args.get("key") or request.headers.get("x-api-key")
 
-# === Helper Functions ===
+        if key != API_KEY:
+            return jsonify({"error": "Invalid or missing API key"}), 403
+
+        return fn(*args, **kwargs)
+    return wrapper
+
+# ----------- Helper Functions ------------
+
 def pad(text: bytes) -> bytes:
     padding_length = AES.block_size - (len(text) % AES.block_size)
     return text + bytes([padding_length] * padding_length)
@@ -59,59 +79,121 @@ async def json_to_proto(json_data: str, proto_message: Message) -> bytes:
     json_format.ParseDict(json.loads(json_data), proto_message)
     return proto_message.SerializeToString()
 
+# ---------- Guest IDS --------------
+
 def get_account_credentials(region: str) -> str:
     r = region.upper()
+
     if r == "IND":
-        return "uid=4732484418&password=BP_E7AKQ4YVHCB"
+        return "uid=4732484418&password=ADD_HERE"
+
     elif r in {"BR", "US", "SAC", "NA"}:
-        return "uid=4737716773&password=xMaSrY_p7p4utfh_hdw"
+        return "uid=4774366356&password=ADD_HERE"
+
     elif r == "VN":
-        return "uid=4737714557&password=xMaSrY_5Pk5Wqyr_lgb"
+        return "uid=4737714557&password=ADD_HERE"
+
     elif r == "SG":
-        return "uid=4737718961&password=xMaSrY_fWkmTbea_zca"
+        return "uid=4737718961&password=ADD_HERE"
+
     elif r == "ID":
-        return "uid=4737720872&password=xMaSrY_bfZlbaoK_Iqt"
+        return "uid=4737720872&password=ADD_HERE"
+
     elif r == "TH":
-        return "uid=3692333198&password=0ED64C5A89E09B8BE538829B0304FE5F5F7EA3BBE645A341C73ECA49143D2211"
+        return "uid=4774298073&password=ADD_HERE"
+
     elif r == "TW":
-        return "uid=3692312456&password=1A062FD700DA8F826AF84A37EE2B62121B79516AF71666949C72FFF42D1C554A"
+        return "uid=4774314170&password=ADD_HERE"
+
+    elif r == "BD":
+        return "uid=4774322299&password=ADD_HERE"
+
+    elif r == "PK":
+        return "uid=4774330898&password=ADD_HERE"
+
+    elif r == "ME":
+        return "uid=4774339389&password=ADD_HERE"
+
+    elif r == "RU":
+        return "uid=4774345536&password=ADD_HERE"
+
+    elif r == "CIS":
+        return "uid=4774350397&password=ADD_HERE"
+
+    elif r == "EUROPE":  #  Fallback to MENA Server ID
+        return "uid=4774375811&password=ADD_HERE"
+
     else:
+        # fallback to ucguest.txt
         try:
-            with open("accounts.txt", "r") as f:
+            with open("ucguest.txt", "r") as f:
                 lines = [line.strip() for line in f if line.strip()]
                 if not lines:
-                    raise ValueError("accounts.txt empty")
+                    raise ValueError("ucguest.txt is empty")
+
                 uid, password = random.choice(lines).split()
                 return f"uid={uid}&password={password}"
+
         except Exception as e:
             return f"ERROR: {e}"
 
+# -------------- Token Generation --------------
 
-# === Token Generation ===
 async def get_access_token(account: str):
     url = "https://ffmconnect.live.gop.garenanow.com/oauth/guest/token/grant"
     payload = account + "&response_type=token&client_type=2&client_secret=2ee44819e9b4598845141067b281621874d0d5d7af9d8f7e00c1e54715b7d1e3&client_id=100067"
-    headers = {'User-Agent': USERAGENT, 'Connection': "Keep-Alive", 'Accept-Encoding': "gzip", 'Content-Type': "application/x-www-form-urlencoded"}
+    headers = {
+        'User-Agent': USERAGENT,
+        'Connection': "Keep-Alive",
+        'Accept-Encoding': "gzip",
+        'Content-Type': "application/x-www-form-urlencoded"
+    }
     async with httpx.AsyncClient() as client:
         resp = await client.post(url, data=payload, headers=headers)
         data = resp.json()
         return data.get("access_token", "0"), data.get("open_id", "0")
 
+
 async def create_jwt(region: str):
     account = get_account_credentials(region)
     token_val, open_id = await get_access_token(account)
-    body = json.dumps({"open_id": open_id, "open_id_type": "4", "login_token": token_val, "orign_platform_type": "4"})
+
+    body = json.dumps({
+        "open_id": open_id,
+        "open_id_type": "4",
+        "login_token": token_val,
+        "orign_platform_type": "4"
+    })
+
     proto_bytes = await json_to_proto(body, FreeFire_pb2.LoginReq())
     payload = aes_cbc_encrypt(MAIN_KEY, MAIN_IV, proto_bytes)
 
-    url = "https://loginbp.ggpolarbear.com/MajorLogin"
-    headers = {'User-Agent': USERAGENT, 'Connection': "Keep-Alive", 'Accept-Encoding': "gzip",
-               'Content-Type': "application/octet-stream", 'Expect': "100-continue",
-               'X-Unity-Version': "2018.4.11f1", 'X-GA': "v1 1", 'ReleaseVersion': RELEASEVERSION}
+    url = "https://loginbp.ggpolarbear.com/MajorLogin"  # ✅ more stable
+    headers = {
+        'User-Agent': USERAGENT,
+        'Connection': "Keep-Alive",
+        'Accept-Encoding': "gzip",
+        'Content-Type': "application/octet-stream",
+        'Expect': "100-continue",
+        'X-Unity-Version': "2018.4.11f1",
+        'X-GA': "v1 1",
+        'ReleaseVersion': RELEASEVERSION
+    }
 
-    async with httpx.AsyncClient() as client:
+    async with httpx.AsyncClient(timeout=10) as client:
         resp = await client.post(url, data=payload, headers=headers)
-        msg = json.loads(json_format.MessageToJson(decode_protobuf(resp.content, FreeFire_pb2.LoginRes)))
+
+        # ✅ SKIP BAD RESPONSES
+        if resp.status_code != 200 or resp.headers.get("content-type") != "application/octet-stream":
+            print(f"❌ TOKEN FAIL [{region}]: {resp.content}")
+            return
+
+        try:
+            decoded = decode_protobuf(resp.content, FreeFire_pb2.LoginRes)
+            msg = json.loads(json_format.MessageToJson(decoded))
+        except Exception as e:
+            print(f"❌ PROTO FAIL [{region}]:", e)
+            return
 
         cached_tokens[region] = {
             'token': f"Bearer {msg.get('token','0')}",
@@ -120,20 +202,20 @@ async def create_jwt(region: str):
             'expires_at': time.time() + 25200
         }
 
+        print(f"✅ TOKEN OK [{region}]")
+
 
 async def initialize_tokens():
-    tasks = [create_jwt(r) for r in SUPPORTED_REGIONS]
-    await asyncio.gather(*tasks)
-
+    await asyncio.gather(*[create_jwt(r) for r in SUPPORTED_REGIONS])
 
 async def refresh_tokens_periodically():
     while True:
         await asyncio.sleep(25200)
         await initialize_tokens()
 
-
 async def get_token_info(region: str) -> Tuple[str,str,str]:
     info = cached_tokens.get(region)
+
     if info and time.time() < info['expires_at']:
         return info['token'], info['region'], info['server_url']
 
@@ -141,31 +223,38 @@ async def get_token_info(region: str) -> Tuple[str,str,str]:
     info = cached_tokens[region]
     return info['token'], info['region'], info['server_url']
 
-
 async def GetAccountInformation(uid, unk, region, endpoint):
-    region = region.upper()
-    if region not in SUPPORTED_REGIONS:
-        raise ValueError("Unsupported region")
+    payload = await json_to_proto(
+        json.dumps({'a': uid, 'b': unk}),
+        main_pb2.GetPlayerPersonalShow()
+    )
 
-    payload = await json_to_proto(json.dumps({'a': uid, 'b': unk}), main_pb2.GetPlayerPersonalShow())
     data_enc = aes_cbc_encrypt(MAIN_KEY, MAIN_IV, payload)
-
     token, lock, server = await get_token_info(region)
 
-    headers = {'User-Agent': USERAGENT, 'Connection': "Keep-Alive", 'Accept-Encoding': "gzip",
-               'Content-Type': "application/octet-stream", 'Expect': "100-continue",
-               'Authorization': token, 'X-Unity-Version': "2018.4.11f1",
-               'X-GA': "v1 1", 'ReleaseVersion': RELEASEVERSION}
+    headers = {
+        'User-Agent': USERAGENT,
+        'Connection': "Keep-Alive",
+        'Accept-Encoding': "gzip",
+        'Content-Type': "application/octet-stream",
+        'Expect': "100-continue",
+        'Authorization': token,
+        'X-Unity-Version': "2018.4.11f1",
+        'X-GA': "v1 1",
+        'ReleaseVersion': RELEASEVERSION
+    }
 
     async with httpx.AsyncClient() as client:
-        resp = await client.post(server+endpoint, data=data_enc, headers=headers)
+        resp = await client.post(server + endpoint, data=data_enc, headers=headers)
 
-        return json.loads(json_format.MessageToJson(
-            decode_protobuf(resp.content, AccountPersonalShow_pb2.AccountPersonalShowInfo)
-        ))
+        return json.loads(
+            json_format.MessageToJson(
+                decode_protobuf(resp.content, AccountPersonalShow_pb2.AccountPersonalShowInfo)
+            )
+        )
 
+# -------------- Cache Decorator --------------
 
-# === Cache ===
 def cached_endpoint(ttl=300):
     def decorator(fn):
         @wraps(fn)
@@ -173,76 +262,85 @@ def cached_endpoint(ttl=300):
             key = (request.path, tuple(request.args.items()))
             if key in cache:
                 return cache[key]
+
             res = fn(*a, **k)
             cache[key] = res
             return res
+
         return wrapper
     return decorator
 
+# -------------- Routes Endpoints --------------
 
-# === Routes ===
-@app.route('/player-info')
+@app.route('/uc-info')
+@require_api_key
 @cached_endpoint()
 def get_account_info():
-    check = require_api_key()
-    if check:
-        return check
-
-    region = request.args.get('region')
     uid = request.args.get('uid')
 
     if not uid:
-        return jsonify({"error": "Please provide UID."}), 400
+        return jsonify({"error": "Please provide UID Else try correct endpoint."}), 400
 
-    if not region:
-        return jsonify({"error": "Please provide REGION."}), 400
-
-    try:
-        return_data = asyncio.run(GetAccountInformation(uid, "7", region, "/GetPlayerPersonalShow"))
-        formatted_json = json.dumps(return_data, indent=2, ensure_ascii=False)
-        return formatted_json, 200, {'Content-Type': 'application/json; charset=utf-8'}
-
-    except Exception:
-        return jsonify({"error": "Invalid UID or Region"}), 500
-
-
-@app.route('/refresh', methods=['GET','POST'])
-def refresh_tokens_endpoint():
-    check = require_api_key()
-    if check:
-        return check
-
-    try:
-        asyncio.run(initialize_tokens())
-        return jsonify({'message':'Tokens refreshed'}),200
-    except Exception as e:
-        return jsonify({'error': str(e)}),500
-
-
-# === Background Thread (Render Safe) ===
-async def startup():
-    await initialize_tokens()
-    asyncio.create_task(refresh_tokens_periodically())
-
-
-def start_background_loop():
+    # Create event loop safely
     loop = asyncio.new_event_loop()
     asyncio.set_event_loop(loop)
-    loop.run_until_complete(startup())
+
+    # 🔁 If UID already cached with region
+    if uid in uid_region_cache:
+        try:
+            data = loop.run_until_complete(
+                GetAccountInformation(uid, "7", uid_region_cache[uid], "/GetPlayerPersonalShow")
+            )
+            return json.dumps(data, indent=2), 200, {'Content-Type': 'application/json'}
+        except:
+            pass  # fallback to scanning all regions
+
+    # 🔍 Try all regions
+    for region in SUPPORTED_REGIONS:
+        try:
+            data = loop.run_until_complete(
+                GetAccountInformation(uid, "7", region, "/GetPlayerPersonalShow")
+            )
+
+            # Save detected region
+            uid_region_cache[uid] = region
+
+            return json.dumps(data, indent=2), 200, {'Content-Type': 'application/json'}
+
+        except:
+            continue
+
+    return jsonify({"error": "UID not found"}), 404
+
+
+@app.route('/ref-token', methods=['GET', 'POST'])
+@require_api_key
+def refresh_tokens_endpoint():
+    try:
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+        loop.run_until_complete(initialize_tokens())
+
+        return jsonify({'message': 'Tokens refreshed'}), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+# -------------- async Startup --------------
+
+started = False
+
+def start_background_loop():
+    global started
+    if started:
+        return
+    started = True
+
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+
+    loop.run_until_complete(initialize_tokens())
+    loop.create_task(refresh_tokens_periodically())
     loop.run_forever()
 
-
-bg_started = False
-
-@app.before_request
-def start_bg():
-    global bg_started
-    if not bg_started:
-        threading.Thread(target=start_background_loop, daemon=True).start()
-        bg_started = True
-
-
-
-# === Run ===
-if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000)
+threading.Thread(target=start_background_loop, daemon=True).start()
